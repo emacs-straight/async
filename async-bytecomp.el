@@ -41,17 +41,14 @@
 (require 'cl-lib)
 (require 'async)
 
-(defcustom async-bytecomp-allowed-packages
-  ;; FIXME: Arguably the default should be `all', but currently
-  ;; this minor mode is silently/forcefully enabled by Helm and Magit to ensure
-  ;; they get compiled asynchronously, so this conservative default value is
-  ;; here to make sure that the mode can be enabled without the user's
-  ;; explicit consent.
-  '(async helm helm-core helm-ls-git helm-ls-hg magit)
+(declare-function package-desc-name "package.el")
+(declare-function package-desc-dir "package.el")
+
+(defcustom async-bytecomp-allowed-packages 'all
   "Packages in this list will be compiled asynchronously by `package--compile'.
 All the dependencies of these packages will be compiled async too,
 so no need to add dependencies to this list.
-The value of this variable can also be the symbol `all', in this case
+The value of this variable can also be the symbol `all' (default), in this case
 all packages are always compiled asynchronously."
   :group 'async
   :type '(choice
@@ -91,13 +88,13 @@ All *.elc files are systematically deleted before proceeding."
                          (cl-incf n)))
                      (if (> n 0)
                          (message "Failed to compile %d files in directory `%s'" n directory)
-                         (message "Directory `%s' compiled asynchronously with warnings" directory)))))
-               (unless quiet
-                 (message "Directory `%s' compiled asynchronously with success" directory))))))
+                       (message "Directory `%s' compiled asynchronously with warnings" directory)))))
+             (unless quiet
+               (message "Directory `%s' compiled asynchronously with success" directory))))))
     (async-start
      `(lambda ()
         (require 'bytecomp)
-        ,(async-inject-variables "\\`\\(load-path\\)\\|byte\\'")
+        ,(async-inject-variables "\\`\\(?:load-path\\'\\|byte-\\)")
         (let ((default-directory (file-name-as-directory ,directory))
               error-data)
           (add-to-list 'load-path default-directory)
@@ -125,8 +122,7 @@ All *.elc files are systematically deleted before proceeding."
   (let ((seen '()))
     (while pkgs
       (let ((pkg (pop pkgs)))
-        (if (memq pkg seen)
-            nil ;; Done already!
+        (unless (memq pkg seen)
           (let ((pkg-desc (cadr (or (assq pkg package-archive-contents)
                                     (assq pkg package-alist)))))
             (when pkg-desc
@@ -158,7 +154,7 @@ All *.elc files are systematically deleted before proceeding."
 
 ;;;###autoload
 (define-minor-mode async-bytecomp-package-mode
-    "Byte compile asynchronously packages installed with package.el.
+  "Byte compile asynchronously packages installed with package.el.
 Async compilation of packages can be controlled by
 `async-bytecomp-allowed-packages'."
   :group 'async
