@@ -308,11 +308,11 @@ ESC or `q' to not overwrite any of the remaining files,
                    (error "Cannot copy `%s' into its subdirectory `%s'"
                           from to)))
             ;; Skip file if it is too large.
-            (if (and (memq operation '(copy rename))
+            (if (and (member operation '("Copy" "Rename"))
                      (eq (dired-async--abort-if-file-too-large
                           (file-attribute-size
                            (file-attributes (file-truename from)))
-                          (symbol-name operation) from)
+                          (downcase operation) from)
                          'abort))
                 (push from skipped)
               (if overwrite
@@ -377,6 +377,8 @@ ESC or `q' to not overwrite any of the remaining files,
        (async-start `(lambda ()
                        (require 'cl-lib) (require 'dired-aux) (require 'dired-x)
                        ,(async-inject-variables dired-async-env-variables-regexp)
+                       (advice-add #'files--ask-user-about-large-file
+                                   :override (lambda (&rest args) nil))
                        (let ((dired-recursive-copies (quote always))
                              (dired-copy-preserve-time
                               ,dired-copy-preserve-time)
