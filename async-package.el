@@ -22,6 +22,9 @@
 
 ;;; Commentary:
 
+;; Provide the function `async-package-do-action' to
+;; (re)install/upgrade packages asynchronously.
+
 ;;; Code:
 
 (eval-when-compile (require 'cl-lib))
@@ -64,8 +67,10 @@ Argument ERROR-FILE is the file where errors are logged, if some."
       `(lambda ()
          (require 'bytecomp)
          (setq package-archives ',package-archives
-               package-pinned-packages ',package-pinned-packages)
-         (package-initialize)
+               package-pinned-packages ',package-pinned-packages
+               package-archive-contents ',package-archive-contents
+               package-alist ',package-alist
+               load-path ',load-path)
          (prog1
              (condition-case err
                  (mapc ',fn ',packages)
@@ -93,32 +98,32 @@ Argument ERROR-FILE is the file where errors are logged, if some."
               (delete-file error-file)
               (async-package--modeline-mode -1))
           (when result
-            (when (eq action 'install)
-              (let ((pkgs (when result
-                            (if (listp result) result (list result)))))
+            (let ((pkgs (if (listp result) result (list result))))
+              (when (eq action 'install)
                 (customize-save-variable
                  'package-selected-packages
-                 (delete-dups (append pkgs package-selected-packages)))))
-            (package-activate-all) ; load packages.
-            (async-package--modeline-mode -1)
-            (message "%s %s packages done" action-string (length packages))
-            (run-with-timer
-             0.1 nil
-             (lambda (lst str)
-               (dired-async-mode-line-message
-                "%s %d package(s) done"
-                'async-package-message
-                str (length lst)))
-             packages action-string)
-            (when (file-exists-p async-byte-compile-log-file)
-              (let ((buf (get-buffer-create byte-compile-log-buffer)))
-                (with-current-buffer buf
-                  (goto-char (point-max))
-                  (let ((inhibit-read-only t))
-                    (insert-file-contents async-byte-compile-log-file)
-                    (compilation-mode))
-                  (display-buffer buf)
-                  (delete-file async-byte-compile-log-file))))))))
+                 (delete-dups (append pkgs package-selected-packages))))
+              (package-load-all-descriptors) ; refresh package-alist.
+              (mapc #'package-activate pkgs) ; load packages.
+              (async-package--modeline-mode -1)
+              (message "%s %s packages done" action-string (length packages))
+              (run-with-timer
+               0.1 nil
+               (lambda (lst str)
+                 (dired-async-mode-line-message
+                  "%s %d package(s) done"
+                  'async-package-message
+                  str (length lst)))
+               packages action-string)
+              (when (file-exists-p async-byte-compile-log-file)
+                (let ((buf (get-buffer-create byte-compile-log-buffer)))
+                  (with-current-buffer buf
+                    (goto-char (point-max))
+                    (let ((inhibit-read-only t))
+                      (insert-file-contents async-byte-compile-log-file)
+                      (compilation-mode))
+                    (display-buffer buf)
+                    (delete-file async-byte-compile-log-file)))))))))
      'async-pkg-install t)
     (async-package--modeline-mode 1)))
 
