@@ -1,2 +1,2 @@
 ;; Generated package description from async.el  -*- no-byte-compile: t -*-
-(define-package "async" "1.9.9.0.20241005.182443" "Asynchronous processing in Emacs" '((emacs "24.4")) :commit "af47d6f930f93d4fdc4ca46e19e17547bf486c4c" :authors '(("John Wiegley" . "jwiegley@gmail.com")) :maintainer '("Thierry Volpiatto" . "thievol@posteo.net") :keywords '("async") :url "https://github.com/jwiegley/emacs-async")
+(define-package "async" "1.9.9.0.20241120.64208" "Asynchronous processing in Emacs" '((emacs "24.4")) :commit "863b3366a0077279646bf9eec1f97dba6c052440" :authors '(("John Wiegley" . "jwiegley@gmail.com")) :maintainer '("Thierry Volpiatto" . "thievol@posteo.net") :keywords '("async") :url "https://github.com/jwiegley/emacs-async")
