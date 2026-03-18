@@ -1,2 +1,2 @@
-;; Generated package description from async.el  -*- no-byte-compile: t -*-
-(define-package "async" "1.9.9.0.20251005.63407" "Asynchronous processing in Emacs" '((emacs "24.4")) :commit "31cb2fea8f4bc7a593acd76187a89075d8075500" :authors '(("John Wiegley" . "jwiegley@gmail.com")) :maintainer '("Thierry Volpiatto" . "thievol@posteo.net") :keywords '("async") :url "https://github.com/jwiegley/emacs-async")
+;; Generated package description from async.el  -*- no-byte-compile: t; lexical-binding:t -*-
+(define-package "async" "1.9.9.0.20260316.224812" "Asynchronous processing in Emacs" '((emacs "24.4")) :commit "9cc1e804395342bc028800d87c5318ccd97d6071" :authors '(("John Wiegley" . "jwiegley@gmail.com")) :maintainer '("Thierry Volpiatto" . "thievol@posteo.net") :keywords '("async") :url "https://github.com/jwiegley/emacs-async")

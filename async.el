@@ -10,7 +10,7 @@
 ;; Package-Requires: ((emacs "24.4"))
 
 ;; Keywords: async
-;; X-URL: https://github.com/jwiegley/emacs-async
+;; URL: https://github.com/jwiegley/emacs-async
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -487,7 +487,7 @@ used globally.  Should be found with `locate-library'.")
                            (with-temp-buffer
                              (async--insert-sexp (list 'quote sexp))
                              (buffer-string))
-                           "<none>")))))
+                         "<none>")))))
 
 ;;;###autoload
 (defun async-start (start-func &optional finish-func)
