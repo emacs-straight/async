@@ -99,6 +99,17 @@ or rename for `dired-async-skip-fast'."
   '((t (:foreground "Gold")))
   "Face used for `dired-async--modeline-mode' lighter.")
 
+(defvar dired-async-file-directory-p-fn #'file-directory-p
+  "The function used as `file-directory-p' fn for the from files.
+In `dired-create-files', `file-directory-p' run on each candidate
+before being async, which is costly when copying many files from a
+remote like for example `adb'.  A faster function may be let-bound to this
+variable to speedup preprocessing of candidates in
+`dired-create-files'.  For instance, Helm use here
+`helm-ff--file-directory-p'.  This is used only once on each candidate
+during the preprocessing of files before running async.  It should be
+used only there and let-bounded, don't bind it globally.")
+
 (define-minor-mode dired-async--modeline-mode
   "Notify mode-line that an async process run."
   :global t
@@ -244,10 +255,10 @@ cases if `dired-async-skip-fast' is non-nil."
               (progn
                 (push old quick-list)
                 (setq total-size (+ total-size (nth 7 attrs))))
-            (push old async-list)))))
-    (when (> total-size dired-async-small-file-max)
-      (setq async-list (append quick-list async-list)
-            quick-list nil))
+            (push old async-list))))
+      (when (> total-size dired-async-small-file-max)
+        (setq async-list (append quick-list async-list)
+              quick-list nil)))
     (when async-list
       (dired-async-create-files
        file-creator operation (nreverse async-list)
@@ -310,7 +321,7 @@ ESC or `q' to not overwrite any of the remaining files,
             ;; need such a construction of the target directory,
             ;; so modify the destination TO to "~/test/" instead of "~/test/foo/".
             (let ((destname (file-name-directory to)))
-              (when (and (file-directory-p from)
+              (when (and (funcall dired-async-file-directory-p-fn from)
                          (file-directory-p to)
                          (eq file-creator 'dired-copy-file))
                 (setq to destname))
